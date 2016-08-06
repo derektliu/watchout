@@ -4,14 +4,16 @@ var allEnemies = [];
 // set how often the asteroids move
 var interval = 3000;
 var speed = 3000;
-var numEnemies = 3;
+var numEnemies = 10;
 var playerRadius = 10;
-var enemyRadius = 10;
+var enemyRadius = 40;
 var collisions = 0;
 var currentScore = 0;
 var highScore = 0;
+var boardWidth = 800;
+var boardHeight = 600;
 
-var player = { cx: 350, cy: 225, r: playerRadius };
+var player = { cx: boardWidth / 2, cy: boardHeight / 2, r: playerRadius };
 
 // create asteroids for board
 var createEnemies = function(n) {
@@ -21,15 +23,25 @@ var createEnemies = function(n) {
   }
 };
 
-// Board size: x="700" y="450"
 // randomize position of current asteroid
 var randomize = function(asteroid) {
-  asteroid.cx = Math.random() * 700;
-  asteroid.cy = Math.random() * 450;
+  asteroid.cx = Math.random() * boardWidth;
+  asteroid.cy = Math.random() * boardHeight;
   return asteroid;
 };
 
 createEnemies(numEnemies);
+
+// Create SVG inside Board
+d3.select('.board')
+.append('svg')
+.attr('baseProfile', 'full')
+.attr('width', boardWidth)
+.attr('height', boardHeight)
+.append('rect')
+.attr('width', '100%')
+.attr('height', '100%')
+.attr('fill', 'black');
 
 var svg = d3.select('svg');
 var selectEnemy = svg.selectAll('enemy').data(allEnemies);
@@ -52,7 +64,7 @@ var updateCoordinates = function() {
 var checkCollisions = function() {
   var xPlayer = selectPlayer.attr('cx');
   var yPlayer = selectPlayer.attr('cy');
-  // console.log(xPlayer, yPlayer);
+
   for (var i = 0; i < numEnemies; i++) {
     
     var xEnemy = selectEnemy[0][i].attributes.cx.value;
@@ -66,6 +78,7 @@ var checkCollisions = function() {
     }
 
   }
+  // add to score every tick
   currentScore++;
   d3.select('.current').select('span').data([currentScore]).text(function(d) { return d; });
 
@@ -76,9 +89,7 @@ var checkCollisions = function() {
 
 };
 
-setInterval(checkCollisions, 10);
-
-// Create Player
+// Create Player inside SVG
 selectPlayer
 .enter()
 .append('circle')
@@ -89,19 +100,33 @@ selectPlayer
 .call(drag)
 .style('fill', 'orange');
 
-// // Create Enemies
+// Create pattern in SVG for asteroids
+svg.append('defs').append('pattern')
+.attr('id', 'image')
+.attr('height', '100%')
+.attr('width', '100%')
+.attr('viewBox', '0 0 100 100')
+.append('image')
+.attr('xlink:href', 'asteroid.png')
+.attr('width', 100)
+.attr('height', 100);
+
+// // Create Enemies inside SVG
 selectEnemy
 .enter()
 .append('circle')
-.attr('class', 'enemy')
+.attr('class', 'enemy spin')
 .attr('cx', function(d) { return d.cx; })
 .attr('cy', function(d) { return d.cy; })
-.attr('r', function(d) { return d.r; });
+.attr('r', function(d) { return d.r; })
+.attr('fill', 'url(#image)');
 
+updateCoordinates();
 // Randomize locations of enemies
 setInterval(updateCoordinates, interval);
 
 
 // Check collisions interval
+setInterval(checkCollisions, 10);
 
 
