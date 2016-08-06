@@ -1,18 +1,23 @@
 // start slingin' some d3 here.
 
-var allAsteroids = [];
+var allEnemies = [];
 // set how often the asteroids move
-var interval = 1500;
-var speed = 750;
-var numAsteroids = 30;
+var interval = 2000;
+var speed = 2000;
+var numEnemies = 10;
+var playerRadius = 10;
+var enemyRadius = 10;
+var collisions = 0;
+var currentScore = 0;
+var highScore = 0;
 
-var player = { cx: 350, cy: 225, r: 10 };
+var player = { cx: 350, cy: 225, r: playerRadius };
 
 // create asteroids for board
-var createAsteroids = function(n) {
+var createEnemies = function(n) {
   for (var i = 0; i < n; i++ ) {
-    allAsteroids[i] = { r: 10 };
-    randomize(allAsteroids[i]);
+    allEnemies[i] = { r: enemyRadius };
+    randomize(allEnemies[i]);
   }
 };
 
@@ -24,11 +29,10 @@ var randomize = function(asteroid) {
   return asteroid;
 };
 
-createAsteroids(numAsteroids);
-// console.log('allAsteroids', allAsteroids);
+createEnemies(numEnemies);
 
 var svg = d3.select('svg');
-var selectEnemy = svg.selectAll('enemy').data(allAsteroids);
+var selectEnemy = svg.selectAll('enemy').data(allEnemies);
 var selectPlayer = svg.selectAll('player').data([player]);
 
 // Create drag behavior
@@ -45,14 +49,44 @@ var updateCoordinates = function() {
   .attr('cy', function(d) { return Math.random() * 450; });
 };
 
+var checkCollisions = function() {
+  var xPlayer = selectPlayer.attr('cx');
+  var yPlayer = selectPlayer.attr('cy');
+  // console.log(xPlayer, yPlayer);
+  for (var i = 0; i < numEnemies; i++) {
+    var xEnemy = selectEnemy.attr('cx');
+    var yEnemy = selectEnemy.attr('cy');
+    // console.log(xEnemy, yEnemy);
+    var distance = Math.sqrt( (Math.pow( (xPlayer - xEnemy), 2) + (Math.pow( (yPlayer - yEnemy), 2) )));
+    // console.log(i, Math.floor(distance));
+    if (distance < playerRadius) {
+      collisions++;
+      currentScore = 0;
+      // console.log('collision!', collisions);
+      d3.select('.collisions').select('span').data([collisions]).text(function(d) { return d; });
+    }
+  }
+  currentScore++;
+  d3.select('.current').select('span').data([currentScore]).text(function(d) { return d; });
+
+  if (currentScore > highScore) {
+    highScore = currentScore;
+    d3.select('.highscore').select('span').data([highScore]).text(function(d) { return d; });
+  }
+
+};
+setInterval(checkCollisions, 10);
+
 // // Create Enemies
 selectEnemy
-.enter().append('circle')
+.enter()
+.append('circle')
 .attr('class', 'enemy')
 .attr('cx', function(d) { return d.cx; })
 .attr('cy', function(d) { return d.cy; })
 .attr('r', function(d) { return d.r; })
 .attr('href', 'asteroid.png');
+
 // Randomize locations of enemies
 setInterval(updateCoordinates, interval);
 
@@ -66,3 +100,7 @@ selectPlayer
 .attr('r', function(d) { return d.r; })
 .call(drag)
 .style('fill', 'orange');
+
+// Check collisions interval
+
+
