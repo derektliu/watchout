@@ -2,9 +2,9 @@
 
 var allEnemies = [];
 // set how often the asteroids move
-var interval = 2000;
-var speed = 2000;
-var numEnemies = 10;
+var interval = 3000;
+var speed = 3000;
+var numEnemies = 3;
 var playerRadius = 10;
 var enemyRadius = 10;
 var collisions = 0;
@@ -54,17 +54,17 @@ var checkCollisions = function() {
   var yPlayer = selectPlayer.attr('cy');
   // console.log(xPlayer, yPlayer);
   for (var i = 0; i < numEnemies; i++) {
-    var xEnemy = selectEnemy.attr('cx');
-    var yEnemy = selectEnemy.attr('cy');
-    // console.log(xEnemy, yEnemy);
+    
+    var xEnemy = selectEnemy[0][i].attributes.cx.value;
+    var yEnemy = selectEnemy[0][i].attributes.cy.value;
     var distance = Math.sqrt( (Math.pow( (xPlayer - xEnemy), 2) + (Math.pow( (yPlayer - yEnemy), 2) )));
-    // console.log(i, Math.floor(distance));
-    if (distance < playerRadius) {
+    
+    if (distance < playerRadius + enemyRadius) {
       collisions++;
       currentScore = 0;
-      // console.log('collision!', collisions);
       d3.select('.collisions').select('span').data([collisions]).text(function(d) { return d; });
     }
+
   }
   currentScore++;
   d3.select('.current').select('span').data([currentScore]).text(function(d) { return d; });
@@ -75,20 +75,8 @@ var checkCollisions = function() {
   }
 
 };
+
 setInterval(checkCollisions, 10);
-
-// // Create Enemies
-selectEnemy
-.enter()
-.append('circle')
-.attr('class', 'enemy')
-.attr('cx', function(d) { return d.cx; })
-.attr('cy', function(d) { return d.cy; })
-.attr('r', function(d) { return d.r; })
-.attr('href', 'asteroid.png');
-
-// Randomize locations of enemies
-setInterval(updateCoordinates, interval);
 
 // Create Player
 selectPlayer
@@ -100,6 +88,19 @@ selectPlayer
 .attr('r', function(d) { return d.r; })
 .call(drag)
 .style('fill', 'orange');
+
+// // Create Enemies
+selectEnemy
+.enter()
+.append('circle')
+.attr('class', 'enemy')
+.attr('cx', function(d) { return d.cx; })
+.attr('cy', function(d) { return d.cy; })
+.attr('r', function(d) { return d.r; });
+
+// Randomize locations of enemies
+setInterval(updateCoordinates, interval);
+
 
 // Check collisions interval
 
