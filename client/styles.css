@@ -6,3 +6,10 @@ Feel free to use it if you like. */
 circle.enemy {
   background-image: url(asteroid.png);
 }
+
+.player {
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
